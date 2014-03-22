@@ -1,0 +1,294 @@
+--------------------------------------------------------------------------------
+                        Google Summer of Code Proposal:
+--------------------------------------------------------------------------------
+
+        Proposer Name: Mandrescu Mihai Petru
+        University   : University of Bucharest, Faculty of Mathematics and
+                       Computer Science
+        Project  Name: Quest generator
+        
+        Introduction:
+        
+                Hello. My name is Mihai(mayk), I am from Romania, I study at the
+                University of Bucharest and I would like to contribute to the
+                pysoy project.
+                
+                Free software and open source software is a relatively new
+                concept to me. I have not been part of any major project so far
+                and I would like to start here. I always liked the idea of
+                making games and have had some experience with tools such as
+                Unity3D or Blender. However, helping to develop an engine sounds
+                like a challenge and I believe I am up to it. If I managed to
+                get you interested, there will be a CV attached bellow detailing
+                my experience.
+               
+        Quick presentation of the idea:
+        
+                On the mailing list, here specifically: 
+                http://lists.pysoy.org/pipermail/pysoy-dev/2014-March/000299.html
+                there is a small game I made using pysoy.
+                
+                The game is a proof-of-concept. It is a very crude quest
+                generator. A quest in the context of a game is a type and
+                location pair. The player must go to the location generated and,
+                depending on the quest type, either retrieve something or give
+                something. In a proper game it could be something like 'Go kill
+                a dragon and get the scales' or 'Give the dragon scales to the
+                armor-smith'. To properly demonstrate the concept, I generate 3
+                random quests. Due to lack of time ( and in the spirit of 
+                honesty, of skill ) I was not able to create a controllable
+                character, so the player sphere "teleports" to random locations
+                where the game decides with a quest is completed.
+                
+                In summary, my proposal is the development of an advanced
+                and customizable quest generator that would function as a
+                core part of the engine. As such, pysoy would become a tempting
+                option for developers of adventure/RPG games or rouge games
+                like Dwarf Fortress. Indeed, a procedurally generated world 
+                would work amazingly with a quest generator.
+                
+        Project Goals:
+                        
+                1. Templates of quests:
+                
+                        The template used by the generator to generate quests.
+                        Quests will be broken intro two main type: Get and Give.
+                        Developers will be instructed to label objects if they
+                        want to use the quest generator.
+                        
+                        A quest is like this: 
+                        
+                        [[type][target][location][item][action][requirements][time][timer][reword]]
+                        
+                2. Quest Line:
+                        
+                        Not every quest will be available from the start.
+                        
+                        This is will be done using a graph that details
+                        relations between quests.
+                        
+                3. Quest Coherence:
+                
+                        Ensuring that quests lines ( and quests ) make sense. 
+                        For example, delivering a crate a fish to a merchant
+                        should not be a requirement to hunt a dragon. 
+                        
+        Implementation:
+                
+                1. Templates of quests:
+                        
+                        Labeling:
+                        
+                        The game object sphere will be considered a potential
+                        for a quest.
+                        
+                        room['sphere'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['sphere'],target)
+                                        
+                        Type must not be null. Either target or location or both
+                        must not be null. Either item or action or both must not
+                        be null. Requirements, time, timer and reword can be null.
+                        
+                        Generation:
+                        
+                        [[type][target][location][item][action][requirements][time][timer][reword]]
+                        
+                        def generate(objectFamily):
+                                   type = random
+                                   target = randomFrom(objectFamily) or null
+                                   location = randomFrom(objectFamily) or null
+                                   ...
+                                   #checks for "doability", for example, if the target of a kill action in not the giver     
+                        
+                        1. The player must go to the Fortress of X would look 
+                           like:
+                        
+                        [[Get][null][FortressOfX][null][enterArea/scene][null][null][null][null]]
+                        
+                        The player would "get" confirmation he entered the scene
+                        FortressOfX or the area in the scene.
+                        
+                        2. The player must kill a wolf with his bare hands in 
+                           at most three day at night:
+                        
+                        [[Get][wolf][null][null][kill][unarmed][21-06][3][50xp]]
+                        
+                        3. The player must deliver the contraband to any thief 
+                        in the City of Y, wearing the Thieves Ring, at dusk:
+                        
+                        [[Give][thief][cityOfX][contraband][null][hasThiefRing][18-20][null][100gold]]
+                
+                2. Quest Line:
+                  
+                        An acyclic, directed graph with three types of nodes, 
+                        START, AND and OR will be generated. Nodes represent
+                        quests. All nodes with in-degree 0 will be labeled 
+                        START. They will be quests available from the start.
+                        All other nodes with be labeled randomly as either AND 
+                        or OR. Nodes labeled AND will require all quests 
+                        leading to them to be completed before unlocking.
+                        Nodes labeled OR will require only one quest
+                        leading to them to be completed.
+                        
+                        S0 ----> A1 ---> A3 ---\
+                             -->    \           --> O2 ---\
+                        S1 -/        \            /        \
+                                      \          /          \
+                        S2 ----> O1 --> A2 -----/            \
+                             -->                              \
+                        S3 -/                                  \
+                                                                \
+                        S4  ------------------------------------> A4
+                        
+                        Quest A4 unlocks when both quest O2 and quest S4
+                        are completed.
+                        Quest S4 is a starter quest, it can be done right away.
+                        Quest O2 is unlocked upon completion of either quest
+                        A3 or quest A2.
+                        Quest A3 unlocks when quest A1 is completed, because it
+                        is the only quest leading into it.
+                        Quest A2 requires both quest A1 and quest O1.
+                        Quest A1 requires both quest S0 and quest S1.
+                        Quest O1 needs only one of S2 or S3 to unlock.
+                        S0, S1, S2 and S3 are starter quests.                                
+                
+                3. Quest Coherence:             
+                                     
+                        The most difficult aspect will be creating a quest line
+                        that makes sense.
+                        This will be achieved through the labeling system
+                        mentioned above.
+                        There will be a classification algorithm that will
+                        classify game objects and use said classification
+                        to relate quests to each other.
+                        The quest line generation algorithm mentioned above
+                        will be run on families of objects instead of all the
+                        objects.
+                        Keywords will also be used to form relationships.
+                        Integration with PyBrain or another machine AI library
+                        will be used to further optimize results.
+                        
+                        An idea of how coherence will be achieved could be:
+                        
+                        room['hunter'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['hunter'],target)
+                        
+                        room['wolf'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['wolf'],target)
+                        
+                        room['bow'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['bow'],item)
+                        
+                        room['questGenerator'].group(room['hunter'],room['wolf'],room['bow'])
+                        
+                        We run the quest line generation algorithm and obtain
+                        a series of quests involving the hunter object, the
+                        wold object and the bow object.
+                        
+                        room['merchant'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['merchant'],target)
+                        
+                        room['city'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['city'],location)
+                        
+                        room['package'] = soy.bodies.Sphere()
+                        room['questGenerator'].label(room['package'],item)
+                        
+                        room['questGenerator'].group(room['merchant'],room['city'],room['package'])
+                        
+                        Again, we run the algorithm and obtain quests relating
+                        to a merchant, a package and a city.
+                        
+        Time Line:
+        
+                Before April 21:
+                
+                        Refining the idea. Consulting with the team.
+                        Discussing with mentors. Clearly defining the steps
+                        necessary in developing the Quest Generator.
+                        Seeing how it can be efficiently integrated.
+        
+                April:
+                        
+                        21: Celebrate being accepted.
+                        
+                        22 through May 22: Create a crude version o the
+                        generator. It will serve to expose problems that may
+                        occur with integration with the game engine and
+                        other issues not considered. Daily presence on the
+                        mailing list and check-up with mentor.
+                                       
+                May:
+                
+                        Beginning of month through May 22: Described above.
+                        
+                        May 23 - June 5: Study time. My examinations begin on
+                        the fifth and end at the start of July. I will
+                        reserve two week for study beforehand. I will not
+                        stop developing, but it will become a secondary
+                        priority. In the spirit of honesty I must let you
+                        know. My activity in this time regarding the project
+                        will consist of trying to find solutions to the
+                        problems that will most certainly be discovered in
+                        April-May.
+                        
+                June:
+                
+                        June 5 - June 10:        
+                        
+                        Project activity in the time will include fixing the
+                        issues discovered in April-May. Implementing what I
+                        thought about in late May.
+                        
+                        June 10 - June 20:
+                        
+                        Integrating alpha quest generator with pysoy.
+                        First "kinda" usable draft.
+                        
+                        June 20 - June 23:
+                        
+                        Making last preparations for mid-term evaluations. This
+                        will include properly documenting the generator, 
+                        patching obscure corner-cases, etc.
+                        
+                        June 23: Submitting tangible results on first day.
+                        
+                        At this point, there are roughly 60 days left. This make
+                        allocating 20 days for each project goal a no-brainer.
+                        
+                        The remaining days ( about 5 ) will be used for
+                        documentation and testing.
+                        
+                        June 24 - July 13:
+                        
+                        Work on the Quest Template / Generation algorithm.
+                        The crude version will most likely have fewer options
+                        and lack the use of keywords for coherent generation.
+                        These are subjects that must be addressed. 
+                July:
+                        Beginning of month through July 13:
+                        Described above.
+                        
+                        July 13 - August 2:
+                        
+                        Work on Quest Line Graph Algorithm. Again, the crude
+                        version will almost certainly lack any sort of grouping
+                        by keywords. Optimizations for time can also be of
+                        interest.
+                        
+                August:
+                
+                        Beginning of month through August 2: 
+                        Described above.
+                        
+                        August 2 - August 15:
+                        
+                        Work on the coherence goal. Perfecting the grouping
+                        algorithms and optimizing the iterations through 
+                        families of objects. Also, developing an algorithm to
+                        find the best quest to link two quest lines generated
+                        from different families of objects.
+                        
+                        August 15 - August 18:
+                        
+                        Testing, patching.
