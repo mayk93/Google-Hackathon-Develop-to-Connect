@@ -1,0 +1,70 @@
+#main-body
+{
+    background-color:#EEE;
+    box-shadow: 2px 2px 2px #888888;
+    margin:auto;
+    width:80%;
+    height:80%;
+    margin-top: 10%;
+    border-radius: 20px;
+}
+
+#user-category
+{
+    border-right: thin solid #333;
+    background-image: linear-gradient(to left, #DDD 0%, #EEE 100%);
+    margin:0;
+    height:100%;
+    padding:1px;
+    color:#333;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+#user-statistics
+{
+    border-left: thin solid #777;
+    margin:0;
+    padding:10%;
+    height:100%;
+}
+
+.container-fluid
+{
+    padding-left:0;
+}
+
+.stat
+{
+    padding-left:10px;
+}
+
+.active-stat
+{
+    margin:0;
+    border-top: thin solid #333;
+    border-bottom: thin solid #333;
+    background-image: linear-gradient(to left, #CCC 0%, #DDD 100%);
+}
+
+.logon-anim
+{
+  animation-duration: 2s;
+  animation-name: anim_logon;
+  animation-iteration-count: infinite;
+}
+
+.task
+{
+    margin:10px;
+    border-radius:2px;
+    box-shadow: 0px 2px 2px #888888;
+}
+
+@keyframes anim_logon {
+    50%{
+        width:80%;
+        height:80%;
+        box-shadow: 2px 2px 5px #6db3f8;
+    }
+}
